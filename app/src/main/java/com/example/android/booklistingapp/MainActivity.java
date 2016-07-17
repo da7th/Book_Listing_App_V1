@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //this is to check if the wifi or mobile data services are connected
+        //this is to check if the wifi or mobile data services are connected and prints to the log and textview
         final String DEBUG_TAG = "NetworkStatusExample";
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -30,18 +30,27 @@ public class MainActivity extends AppCompatActivity {
         boolean isMobileConn = networkInfo.isConnected();
         Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
         Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
-
         tv = (TextView) findViewById(R.id.page_title);
         tv.setText("Wifi Connected:" + isWifiConn + "\nMobile connected:" + isMobileConn);
 
     }
 
-
+    //this is the method executed with the button press
     public void searchBooks(View view){
         editTextView = (EditText) findViewById(R.id.edit_text_view);
         String example = editTextView.getText().toString();
-
+        example = example + "\nisOnline(): " + isOnline();
         tv = (TextView) findViewById(R.id.page_title);
         tv.setText(example);
+
     }
+
+    //this is to check whether the app is connected online or not
+    public boolean isOnline() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
+    }
+
 }
