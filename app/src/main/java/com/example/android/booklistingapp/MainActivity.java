@@ -20,37 +20,47 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //this is to check if the wifi or mobile data services are connected and prints to the log and textview
-        final String DEBUG_TAG = "NetworkStatusExample";
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        boolean isWifiConn = networkInfo.isConnected();
-        networkInfo = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        boolean isMobileConn = networkInfo.isConnected();
-        Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
-        Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
-        tv = (TextView) findViewById(R.id.page_title);
-        tv.setText("Wifi Connected:" + isWifiConn + "\nMobile connected:" + isMobileConn);
 
     }
 
     //this is the method executed with the button press
     public void searchBooks(View view){
         editTextView = (EditText) findViewById(R.id.edit_text_view);
-        String example = editTextView.getText().toString();
-        example = example + "\nisOnline(): " + isOnline();
-        tv = (TextView) findViewById(R.id.page_title);
-        tv.setText(example);
+
+        //check if the app is online or not
+        if (isOnline()) {
+            String searchTerm = editTextView.getText().toString();
+            tv = (TextView) findViewById(R.id.page_title);
+            tv.setText(searchTerm);
+
+
+        } else {
+            tv.setText("No network Connection Available");
+        }
 
     }
 
     //this is to check whether the app is connected online or not
+    //this is to check if the wifi or mobile data services are connected and prints to the log
+
     public boolean isOnline() {
+        final String DEBUG_TAG = "NetworkStatusExample";
+
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        NetworkInfo networkInfoWifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        boolean isWifiConn = networkInfoWifi.isConnected();
+
+        NetworkInfo networkInfoMobile = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        boolean isMobileConn = networkInfoMobile.isConnected();
+
+        Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
+        Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
+
         return (networkInfo != null && networkInfo.isConnected());
+
     }
 
 }
