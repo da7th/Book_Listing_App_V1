@@ -11,10 +11,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     //this is the method executed with the button press
     public void searchBooks(View view){
         editTextView = (EditText) findViewById(R.id.edit_text_view);
-        String apiURL = "http://www.google.com";
+        String apiURL = "https://www.googleapis.com/books/v1/volumes?q=flowers+inauthor:keyes&key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
 
         //check if the app is online or not
         if (isOnline()) {
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private String bookListingTask(String apiurl) throws IOException {
         final String DEBUG_TAG = "NetworkStatusExample";
         InputStream is = null;
-        int count = 10;
+        int count = 10000;
 
         try {
             URL url = new URL(apiurl);
@@ -108,11 +108,13 @@ public class MainActivity extends AppCompatActivity {
 
     // Reads an InputStream and converts it to a String.
     public String readIt(InputStream stream, int len) throws IOException {
-        Reader reader = null;
-        reader = new InputStreamReader(stream, "UTF-8");
-        char[] buffer = new char[len];
-        reader.read(buffer);
-        return new String(buffer);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        String webPage = "", data = "";
+
+        while ((data = reader.readLine()) != null) {
+            webPage += data + "\n";
+        }
+        return webPage;
     }
 
     private class connectToAPITask extends AsyncTask<String, Void, String> {
@@ -125,6 +127,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 
 }
