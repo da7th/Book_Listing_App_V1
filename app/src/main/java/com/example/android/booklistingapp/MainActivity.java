@@ -1,6 +1,7 @@
 package com.example.android.booklistingapp;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -34,6 +35,15 @@ public class MainActivity extends AppCompatActivity {
     //the fixed url
     private String url;
 
+    private String mUserString;
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        stringToJArray(mUserString);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         searchQuery = "";
         searchQueryBox = (EditText) findViewById(R.id.search_query_box);
         url = "https://www.googleapis.com/books/v1/volumes?q=";
+
+
     }
 
     //this method is used to check if that application is connected to the internet
@@ -77,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 String searchUrl = url + searchQuery + "+intitle:" + searchQuery + "&debug.key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
 
                 //getBookInfo(searchUrl)
+
                 new getBookInfo().execute(searchUrl);
 
                 //a toast to check that the getBookInfo() has been executed and completed
@@ -106,12 +119,25 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject item = jArray.getJSONObject(i);
 
                 JSONObject volumeInfo = item.getJSONObject("volumeInfo");
-                String title = volumeInfo.getString("title");
 
+                String title = "";
 
-                JSONArray authors = volumeInfo.getJSONArray("authors");
-                String author = authors.getString(0);
+                try {
+                    title = volumeInfo.getString("title");
 
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    title = "NO TITLE FOUND";
+                }
+
+                String author = "";
+                try {
+                    JSONArray authors = volumeInfo.getJSONArray("authors");
+                    author = authors.getString(0);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    author = "NO AUTHOR FOUND";
+                }
 
                 bookList.add(new Book(title, author));
 
@@ -171,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 userString = bookBuilder.toString();
+                mUserString = userString;
             }
 
             return bookBuilder.toString();
