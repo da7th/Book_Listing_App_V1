@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     //the fixed url
     private String url;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         searchQueryBox = (EditText) findViewById(R.id.search_query_box);
         url = "https://www.googleapis.com/books/v1/volumes?q=";
     }
-
 
     //this method is used to check if that application is connected to the internet
     public boolean isOnline() {
@@ -58,9 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         //return true if there is firstly network info and secondly the network info is connected
         return (networkInfo != null && networkInfo.isConnected());
-
     }
-
 
     //this method is to  append the text in the edit text field to the String Variable searchQuery
     public void submitSearch(View view) {
@@ -72,20 +68,23 @@ public class MainActivity extends AppCompatActivity {
 
         //check if the search query contains any text
         if (searchQuery.length() > 0) {
+
             //if the search query contains text then check if the application is connected and online
             if (isOnline()) {
-                //if the application is connected perform the search
 
+                //if the application is connected perform the search
                 //full search URL
                 String searchUrl = url + searchQuery + "+intitle:" + searchQuery + "&debug.key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
 
                 //getBookInfo(searchUrl)
                 new getBookInfo().execute(searchUrl);
 
-                Toast testToast = Toast.makeText(this, "get book info executed and finished", Toast.LENGTH_LONG);
+                //a toast to check that the getBookInfo() has been executed and completed
+                Toast testToast = Toast.makeText(this, "Search Completed", Toast.LENGTH_LONG);
                 testToast.show();
 
             } else {
+
                 //there is no connectivity message to be displayed
                 Toast disconnectionToast = Toast.makeText(this, "Error: There is no network connectivity.", Toast.LENGTH_SHORT);
                 disconnectionToast.show();
@@ -98,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<Book> bookList = new ArrayList<Book>();
 
         try {
+
             JSONObject jObject = new JSONObject(bookBuilder);
             JSONArray jArray = jObject.getJSONArray("items");
 
@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.v("DEBUGGING", "a book was added to the list");
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -124,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         BookAdapter adapter = new BookAdapter(this, bookList);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(adapter);
-
     }
 
     //this method will be used to get the book information
@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
             //this loop receives the search urls if we had multiple search
             for (String bookSearchURL : BookURLs) {
 
-
                 //for any IO operation there is a chance for error so we use try and catch
                 try {
 
@@ -151,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
                     conn.connect();
                     final String DEBUG_TAG = "ATTENTION";
                     Log.e(DEBUG_TAG, "the response is 200" + conn.getResponseCode());
-
 
                     if (conn.getResponseCode() == 200) {
 
@@ -173,13 +171,9 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 userString = bookBuilder.toString();
-
-
-
             }
 
             return bookBuilder.toString();
-
         }
 
         @Override
@@ -188,5 +182,4 @@ public class MainActivity extends AppCompatActivity {
             stringToJArray(userString);
         }
     }
-
 }

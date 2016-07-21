@@ -18,7 +18,6 @@ public class BookAdapter extends ArrayAdapter<Book> {
     public BookAdapter(Activity context, ArrayList<Book> Books) {
 
         super(context, 0, Books);
-
     }
 
     @Override
@@ -47,6 +46,4 @@ public class BookAdapter extends ArrayAdapter<Book> {
 
         return listItemView;
     }
-
-
 }

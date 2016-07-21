@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -11,35 +12,36 @@
     tools:context="com.example.android.booklistingapp.MainActivity">
 
     <TextView
-        android:id="@+id/page_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="search for a book" />
+        android:gravity="center_horizontal"
+        android:text="Type your book title query below to list all the available results"
+        android:textColor="@color/colorPrimaryLight"
+        android:textSize="12sp" />
 
     <EditText
         android:id="@+id/search_query_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="search here"/>
+        android:hint="search book title here"
+        android:textColorHint="@color/colorPrimary" />
 
     <Button
         android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="@color/colorPrimary"
         android:onClick="submitSearch"
-        android:text="button" />
-
-    <TextView
-        android:id="@+id/response_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="search for a book" />
+        android:text="Search" />
 
     <ListView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:divider="@color/colorDivider"
         android:orientation="vertical">
 
     </ListView>
+
 </LinearLayout>
