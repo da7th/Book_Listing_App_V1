@@ -9,123 +9,172 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
+    //the string that will hold the search query
+    private String searchQuery;
 
-    EditText editTextView;
-    TextView tv;
+    //the editText view where the search query will be entered
+    private EditText searchQueryBox;
+
+    //the fixed url
+    private String url;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        searchQuery = "";
+        searchQueryBox = (EditText) findViewById(R.id.search_query_box);
+        url = "https://www.googleapis.com/books/v1/volumes?q=";
     }
 
-    //this is the method executed with the button press
-    public void searchBooks(View view){
-        editTextView = (EditText) findViewById(R.id.edit_text_view);
-        String apiURL = "https://www.googleapis.com/books/v1/volumes?q=flowers+inauthor:keyes&key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
 
-        //check if the app is online or not
-        if (isOnline()) {
-            String searchTerm = editTextView.getText().toString();
-            tv = (TextView) findViewById(R.id.page_title);
-            tv.setText(searchTerm);
-
-            new connectToAPITask().execute(apiURL);
-
-
-        } else {
-            tv.setText("No network Connection Available");
-        }
-
-    }
-
-    //this is to check whether the app is connected online or not
-    //this is to check if the wifi or mobile data services are connected and prints to the log
-
+    //this method is used to check if that application is connected to the internet
     public boolean isOnline() {
-        final String DEBUG_TAG = "NetworkStatusExample";
 
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
+        //initiate an instance of connectivity manager that accesses the connectivity services, permissions
+        //must be added in the manifest file
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        //create an instance of network Info based on the initiated connectivity manager
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 
-        NetworkInfo networkInfoWifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        boolean isWifiConn = networkInfoWifi.isConnected();
-
-        NetworkInfo networkInfoMobile = connMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        boolean isMobileConn = networkInfoMobile.isConnected();
-
-        Log.d(DEBUG_TAG, "Wifi connected: " + isWifiConn);
-        Log.d(DEBUG_TAG, "Mobile connected: " + isMobileConn);
-
+        //return true if there is firstly network info and secondly the network info is connected
         return (networkInfo != null && networkInfo.isConnected());
 
     }
 
-    private String bookListingTask(String apiurl) throws IOException {
-        final String DEBUG_TAG = "NetworkStatusExample";
-        InputStream is = null;
-        int count = 10000;
+
+    //this method is to  append the text in the edit text field to the String Variable searchQuery
+    public void submitSearch(View view) {
+
+        //append the entered text to the String variable
+        searchQuery = searchQueryBox.getText().toString();
+        //replace the spaces in the text with (+) signs
+        searchQuery = searchQuery.replace(" ", "+");
+
+        //check if the search query contains any text
+        if (searchQuery.length() > 0) {
+            //if the search query contains text then check if the application is connected and online
+            if (isOnline()) {
+                //if the application is connected perform the search
+
+                //full search URL
+                String searchUrl = url + "flowers" + searchQuery + "&debug.key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
+
+                //getBookInfo(searchUrl)
+                new getBookInfo().execute(searchUrl);
+
+                Toast testToast = Toast.makeText(this, "get book info executed and finished", Toast.LENGTH_LONG);
+                testToast.show();
+
+            } else {
+                //there is no connectivity message to be displayed
+                Toast disconnectionToast = Toast.makeText(this, "Error: There is no network connectivity.", Toast.LENGTH_SHORT);
+                disconnectionToast.show();
+            }
+        }
+    }
+
+    public void stringToJArray(String bookBuilder) {
+
+        final ArrayList<Book> bookList = new ArrayList<>();
 
         try {
-            URL url = new URL(apiurl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
+            JSONObject jObject = new JSONObject(bookBuilder);
+            JSONArray jArray = jObject.getJSONArray("items");
 
-            // Starts the query
-            conn.connect();
-            int response = conn.getResponseCode();
-            Log.d(DEBUG_TAG, "The response is: " + response);
-            is = conn.getInputStream();
+            for (int i = 0; i < jArray.length(); i++) {
 
-            // Convert the InputStream into a string
-            String contentAsString = readIt(is, count);
-            Log.e(DEBUG_TAG, "The response is: " + contentAsString);
-            return contentAsString;
+                JSONObject item = jArray.getJSONObject(i);
 
-        } finally {
-            if (is != null) {
-                is.close();
+                JSONObject volumeInfo = item.getJSONObject("volumeInfo");
+                String title = volumeInfo.getString("title");
+
+
+                JSONArray authors = volumeInfo.getJSONArray("authors");
+                String author = authors.getString(0);
+
+
+                bookList.add(new Book(title, author));
             }
-
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
+        BookAdapter adapter = new BookAdapter(this, bookList);
+        ListView listView = (ListView) findViewById(R.id.list);
+        listView.setAdapter(adapter);
     }
 
-    // Reads an InputStream and converts it to a String.
-    public String readIt(InputStream stream, int len) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-        String webPage = "", data = "";
+    //this method will be used to get the book information
+    public class getBookInfo extends AsyncTask<String, Void, String> {
 
-        while ((data = reader.readLine()) != null) {
-            webPage += data + "\n";
-        }
-        return webPage;
-    }
-
-    private class connectToAPITask extends AsyncTask<String, Void, String> {
+        //the following method will use receiver the url and return the search result as string
         @Override
-        protected String doInBackground(String... apiURL) {
-            try {
-                return bookListingTask(apiURL[0]);
-            } catch (IOException e) {
-                return "Unable to retrieve Booklisting.";
+        protected String doInBackground(String... BookURLs) {
+
+            StringBuilder bookBuilder = new StringBuilder();
+
+            //this loop receives the search urls if we had multiple search
+            for (String bookSearchURL : BookURLs) {
+
+
+                //for any IO operation there is a chance for error so we use try and catch
+                try {
+
+                    //this is the http client that will request data
+                    URL url = new URL(bookSearchURL);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.connect();
+                    final String DEBUG_TAG = "ATTENTION";
+                    Log.e(DEBUG_TAG, "the response is 200" + conn.getResponseCode());
+
+
+                    if (conn.getResponseCode() == 200) {
+
+                        //once the entity is acquried, read the content into a buffered reader for processing
+                        InputStream bookContent = conn.getInputStream();
+                        InputStreamReader bookInput = new InputStreamReader(bookContent);
+                        BufferedReader bookReader = new BufferedReader(bookInput);
+
+                        //single string line for the loop
+                        String lineIn;
+
+                        //append the bookreader content to the bookbuilder one line at a time
+                        while ((lineIn = bookReader.readLine()) != null) {
+                            bookBuilder.append(lineIn);
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
+
+            stringToJArray(bookBuilder.toString());
+            return bookBuilder.toString();
+
         }
+
     }
 
 }

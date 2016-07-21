@@ -17,7 +17,7 @@
         android:text="search for a book" />
 
     <EditText
-        android:id="@+id/edit_text_view"
+        android:id="@+id/search_query_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="search here"/>
@@ -26,7 +26,7 @@
         android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="searchBooks"
+        android:onClick="submitSearch"
         android:text="button" />
 
     <TextView
