@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 //if the application is connected perform the search
 
                 //full search URL
-                String searchUrl = url + "flowers" + searchQuery + "&debug.key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
+                String searchUrl = url + searchQuery + "+intitle:" + searchQuery + "&debug.key=AIzaSyCdeM9NxPI07KoBSP9pp9UPJHH78vsqolo";
 
                 //getBookInfo(searchUrl)
                 new getBookInfo().execute(searchUrl);
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void stringToJArray(String bookBuilder) {
 
-        final ArrayList<Book> bookList = new ArrayList<>();
+        final ArrayList<Book> bookList = new ArrayList<Book>();
 
         try {
             JSONObject jObject = new JSONObject(bookBuilder);
@@ -114,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                 bookList.add(new Book(title, author));
+
+                Log.v("DEBUGGING", "a book was added to the list");
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -122,10 +124,13 @@ public class MainActivity extends AppCompatActivity {
         BookAdapter adapter = new BookAdapter(this, bookList);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(adapter);
+
     }
 
     //this method will be used to get the book information
     public class getBookInfo extends AsyncTask<String, Void, String> {
+
+        private String userString;
 
         //the following method will use receiver the url and return the search result as string
         @Override
@@ -167,14 +172,21 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                userString = bookBuilder.toString();
+
+
 
             }
 
-            stringToJArray(bookBuilder.toString());
             return bookBuilder.toString();
 
         }
 
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            stringToJArray(userString);
+        }
     }
 
 }
